@@ -33,26 +33,6 @@ const menuBarElements = [
                         "use strict";
 
                         const file = event.target.files[0];
-                        openFile({ name: file.name, path: URL.createObjectURL(file), });
-                        hideMenus();
-                    },
-                },
-            },
-            {
-                tag: "button",
-                text: "Open ini",
-                name: "openIni",
-                buddy: {
-                    tag: "input",
-                    type: "file",
-                    classes: [
-                        "hidden",
-                    ],
-                    accept: ".ini",
-                    function: (event) => {
-                        "use strict";
-
-                        const file = event.target.files[0];
                         openIni({ name:file.name, path: URL.createObjectURL(file) });
                         hideMenus();
                     },
@@ -69,10 +49,17 @@ const menuBarElements = [
                     const tab = document.querySelector(".tabs > button.active");
                     switch (tab.id) {
                         case "fileButton": {
-                            for (let i = 1; i < SAVE_LEN; i++) {
-                                output += `${SaveData[i]}\n`;
+                            const keys = Object.keys(IniData);
+                            for (const key of keys) {
+                                let section = `[${key}]\n`;
+
+                                const subKeys = Object.keys(IniData[key]);
+                                for (const subKey of subKeys) {
+                                    section += `${subKey}="${IniData[key][subKey]}"\n`;
+                                }
+
+                                output += section;
                             }
-                            output += SaveData[SAVE_LEN];
                             break;
                         }
                         case "iniButton": {
@@ -139,23 +126,6 @@ const menuBarElements = [
             {
                 tag: "input",
                 type: "checkbox",
-                name: "showDogShrine",
-                buddy: {
-                    tag: "label",
-                    text: "Show Dog Shrine",
-                    function: (event) => { "use strict"; event.stopPropagation(); },
-                },
-                function: (event) => {
-                    "use strict";
-
-                    const element = document.querySelector("#mainListDogShrine");
-                    element.classList.toggle("hidden");
-                    event.stopPropagation();
-                },
-            },
-            {
-                tag: "input",
-                type: "checkbox",
                 name: "useDarkTheme",
                 buddy: {
                     tag: "label",
@@ -178,8 +148,8 @@ const menuBarElements = [
         options: [
             {
                 tag: "button",
-                text: "Set monster names yellow",
-                name: "yellowName",
+                text: "PLACEHOLDER",
+                name: "placeholdertool",
                 function: () => {
                     "use strict";
 
@@ -316,14 +286,14 @@ for (const element of menuBarElements) {
 
 const menuTabsElements = [
     {
-        text: "file0",
+        text: "Save.sav",
         name: "fileButton",
         target: document.querySelector("#fileEditor"),
     },
     {
-        text: "undertale.ini",
+        text: "Controls.sav [WIP]",
         name: "iniButton",
-        target: document.querySelector("#iniEditor"),
+        target: document.querySelector("#controlsEditor"),
     }
 ];
 const menuTabs = document.querySelector("#menuTabs");
@@ -357,39 +327,15 @@ for (const element of menuTabsElements) {
 const mainListElements = [
     {
         text: "Player",
-        icon: "images/ico_player.png",
+        icon: "images/ico_clover_64x.png",
         hidden: false,
         target: Pages.PlayerPage(),
-    },
-    {
-        text: "Bosses",
-        icon: "images/ico_toriel.png",
-        hidden: false,
-        target: Pages.BossesPage(),
-    },
-    {
-        text: "Monsters",
-        icon: "images/ico_froggit.png",
-        hidden: false,
-        target: Pages.MonstersPage(),
-    },
-    {
-        text: "Locations",
-        icon: "images/ico_savepoint.png",
-        hidden: false,
-        target: Pages.LocationsPage(),
     },
     {
         text: "Debug",
         icon: "images/ico_debug.png",
         hidden: true,
         target: Pages.DebugPage(),
-    },
-    {
-        text: "Dog Shrine",
-        icon: "images/ico_dogshrine.png",
-        hidden: true,
-        target: Pages.DogShrinePage(),
     }
 ];
 
@@ -433,8 +379,6 @@ for (const element of mainListElements) {
     mainList.appendChild(item);
 }
 
-document.querySelector("#iniContents").appendChild(Pages.IniPage());
-document.querySelector("#yellowNameTool").replaceWith(Pages.YellowNameTool());
 document.querySelector("#aboutDialog").replaceWith(Pages.AboutDialog());
 
 document.onclick = (event) => {
@@ -451,9 +395,13 @@ mainList.children[0].querySelector("button").click();
 document.querySelector("#useDarkTheme").click();
 
 toggleControls({ selector: "#fileEditor *", disabled: true, });
-toggleControls({ selector: "#iniEditor *", disabled: true, });
 toggleControls({ selector: "#menuTabs button", disabled: true, });
 toggleControls({ selector: "#save, #yellowName", disabled: true });
 
 updateStatus({ message: "Waiting for a file.", color: "inherit" });
+updateStatus({ message: `When editing items please pay attention to them as I have yet to create a function for editing items. They must be written in the short form you see in your inventory. If you want a slot to be empty write "Nothing"`, color: "inherit" });
+updateStatus({ message: "This tool is in a very experimental stage. Take a backup of your save file before attempting to change anything.", color: "red" });
+updateStatus({ message: `If anything is broken open an issue here: <a href="${GitHub_Fork_Url}" target="_blank">${GitHub_Fork_Url}</a> `, color: "inherit" });
+
+
 

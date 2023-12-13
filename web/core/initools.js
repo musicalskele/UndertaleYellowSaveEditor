@@ -1,4 +1,4 @@
-import {CommonEditor} from "./tools.js";
+import {ComboEditor, CommonEditor} from "./tools.js";
 
 class IniEditorBase extends CommonEditor {
 	/**
@@ -44,6 +44,13 @@ class IniEditorBase extends CommonEditor {
 		});
 		console.warn(message);
 		updateStatus({message: message, color: "yellow"});
+	}
+
+	addItem(value) {
+		const item = document.createElement("option");
+		item.text = value;
+
+		this.editor.appendChild(item);
 	}
 
 	validateSave() {
@@ -94,19 +101,29 @@ class IniEditorBase extends CommonEditor {
 	/**
 	 * @param {string} [data]
 	 */
-	updateSave(data) {
+	updateSave() {
+		let data;
+	
+		// Check if the value is a number
+		if (!isNaN(this.editor.value)) {
+			// If it's a number, add trailing zeroes
+			data = `${parseFloat(this.editor.value).toFixed(6)}`;
+		} else {
+			// If it's not a number, use the value as is
+			data = `${this.editor.value}`;
+		}
+	
 		if (!data) {
 			data = `${this.editor.value}.000000`; // The .ini file uses a special notation with its numbers, so we need to add some zeroes
 		}
-
+	
 		if (data === IniData[this.saveID][this.saveKey]) {
 			return;
 		}
-
+	
 		console.log(`Value of ${this.editor.title} changed from ${IniData[this.saveID][this.saveKey]} to ${data}`);
 		IniData[this.saveID][this.saveKey] = data;
-		this.updateStyle();
-	}
+		this.updateStyle();}
 
 	/**
 	 * @param {string} [data]
@@ -142,6 +159,154 @@ export class IniLineEditor extends IniEditorBase {
 				break;
 			}
 		}
+	}
+}
+export class IniCombinedEditor extends IniEditorBase {
+	constructor(args) {
+	  args.element = "select";
+	  super({ ...args });
+  
+	  this.indexes = {}; // These are manually added for each entry
+  
+	  switch (args.id) {
+		case "Save1/Weapon": {
+		  this.addItem("Toy Gun");
+		  this.indexes[0] = 0;
+		  this.addItem("W. Revoler");
+		  this.indexes[1] = 1;
+		  break;
+		}
+		
+		case "Save1/Armor": {
+			this.addItem("Worn Hat");
+			this.indexes[0] = 0;
+			this.addItem("Nice Hat");
+			this.indexes[1] = 1;
+			break;
+		}
+		case "Save1/Ammo":{
+			 /** @type {IniSpinEditor} */
+			 this.buddy = args.buddy;
+			 this.addItem("Rubber Ammo");
+			 this.indexes[0] = 0;
+			 this.addItem("Pebbles");
+			 this.indexes[1] = 1;
+			 this.addItem("Silver Ammo");
+			 this.indexes[2] = 2;
+			 this.addItem("Coffee Ammo");
+			 this.indexes[3] = 3;
+			 this.addItem("Glass Ammo");
+			 this.indexes[4] = 4;
+			 this.addItem("Ice Ammo");
+			 this.indexes[5] = 5;
+			 this.addItem("Flint Ammo");
+			 this.indexes[6] = 6;
+			 this.addItem("Nails");
+			 this.indexes[7] = 7;
+			 this.addItem("F Pellets");
+			 this.indexes[8] = 8;
+			 this.addItem("Super Ammo");
+			 this.indexes[9] = 9;
+			 this.buddyValues = [0,3,3,4,5,6,9,10,11,15];
+			 break;
+			}
+		case "Save1/Accessory": {
+		  /** @type {IniSpinEditor} */
+		  this.buddy = args.buddy;
+		  this.addItem("Patch");
+		  this.indexes[0] = 0;
+		  this.addItem("Feather");
+		  this.indexes[1] = 1;
+		  this.addItem("Honeydew Pin");
+		  this.indexes[2] = 2;
+		  this.addItem("Band Merch Pin");
+		  this.indexes[3] = 3;
+		  this.addItem("Safety Jacket");
+		  this.indexes[4] = 4;
+		  this.addItem("Silver Scarf");
+		  this.indexes[5] = 5;
+		  this.addItem("Steel Buckle");
+		  this.indexes[6] = 6;
+		  this.addItem("Fancy Holster");
+		  this.indexes[7] = 7;
+		  this.addItem("Safety Goggles");
+		  this.indexes[8] = 8;
+		  this.addItem("Delta Rune Patch");
+		  this.indexes[9] = 9;
+		  this.addItem("G. Bandana");
+		  this.indexes[10] = 10;
+		  
+		  this.buddyValues = [0, 2, 4, 0, 5, 6, 7, 8, 9, 10, 12];
+		  break;
+		}
+	  }
+	}
+  
+	callback() {
+		// Check if buddy is defined before using it
+		if (this.buddy) {
+		  this.buddy.editor.value = this.buddyValues[this.editor.selectedIndex];
+		  this.buddy.updateSave();
+		} else {
+		  console.error("No buddy defined for IniCombinedEditor.");
+		}
+	  }
+	}
+
+export class IniArmorEditor extends ComboEditor {
+	constructor(args) {
+		super({...args});
+
+		// region Values
+		this.addItem("Worn Hat");
+		this.addItem("Nice Hat");
+		// endregion
+		this.indexes = {
+			"Worn Hat": 0,
+			"Nice Hat": 1
+		  };
+
+	}
+}
+
+export class IniAmmoEditor extends ComboEditor {
+	constructor(args) {
+		super({...args});
+
+		/** @type {IniSpinEditor} */
+		this.buddy = args.buddy;
+
+		// region Values
+		this.addItem("Rubber Ammo");
+		this.addItem("Pebbles");
+		this.addItem("Silver Ammo");
+		this.addItem("Coffee Ammo");
+		this.addItem("Glass Ammo");
+		this.addItem("Ice Ammo");
+		this.addItem("Flint Ammo");
+		this.addItem("Nails");
+		this.addItem("Friendliness Pellets");
+		this.addItem("Super Ammo [UNOBTAINABLE]");
+		// endregion
+		this.atValues = [0,3,3,4,5,6,9,10,11,15];
+		this.indexes = {
+			"Rubber Ammo": 0,
+			"Pebbles": 1,
+			"Silver Ammo": 2,
+			"Coffee Ammo": 3,
+			"Glass Ammo": 4,
+			"Ice Ammo": 5,
+			"Flint Ammo": 6,
+			"Nails": 7,
+			"F. Pellets": 8,
+			"Super Ammo": 9
+		  };
+
+	}
+
+	callback() {
+		this.buddy.editor.value = this.atValues[this.editor.selectedIndex];
+		this.buddy.updateSave();
 	}
 }
 
@@ -344,117 +509,24 @@ export class IniCheckEditor extends IniEditorBase {
 
 		// noinspection SpellCheckingInspection
 		switch (args.id) {
-			case "General/BH": {
-				this.addHintText("Border Hard Mode. Console exclusive stuff");
+			
+			case "Save1/FTravel": {
+				this.addHintText("Fast Travel enabled (?)");
 				break;
 			}
-			case "General/BP": {
-				this.addHintText("Border Pacifist. Console exclusive stuff");
+			case "Save1/Satchel": {
+				this.addHintText("Does it store infinite items?");
 				break;
 			}
-			case "General/BW": {
-				this.addHintText("Border Won. Console exclusive stuff");
+			case "Save1/Follower": {
+				this.addHintText("Your follower.");
 				break;
 			}
-			case "General/CH": {
-				this.addHintText("Complete Hard Mode");
+			case "Save1/playerCanRun:": {
+				this.addHintText("Enables/Disables running (maybe)");
 				break;
 			}
-			case "General/CP": {
-				this.addHintText("Complete Pacifist");
-				break;
-			}
-			case "General/Tale": {
-				this.addHintText("Heard the Tale of the Fallen Human");
-				break;
-			}
-			case "General/Truth": {
-				this.addHintText(`(Never set) Activates "Activity Level A" and "Activity Level B"`);
-				break;
-			}
-			case "Flowey/AF": {
-				this.addHintText("Reached an ending without finishing True Lab");
-				break;
-			}
-			case "Flowey/AK": {
-				// noinspection SpellCheckingInspection
-				this.addHintText("Reached an ending where only Asgore was killed");
-				break;
-			}
-			case "Flowey/Alter": {
-				// noinspection SpellCheckingInspection
-				this.addHintText("Set to true if truename, IK or NK is true. Changes Flowey dialog and interactions");
-				break;
-			}
-			case "Flowey/CK": {
-				// noinspection SpellCheckingInspection
-				this.addHintText("(Never set) (Never used) Is loaded at the final Flowey conversation, but does nothing");
-				break;
-			}
-			case "Flowey/FloweyExplain1": {
-				// noinspection SpellCheckingInspection
-				this.addHintText("First kill Toriel then reload and spare her (or the reverse). Flowey will explain the power of saving");
-				break;
-			}
-			case "Flowey/IK": {
-				this.addHintText("Reached an ending where you made at least 1 kill (if NK is false, IK must be also false)");
-				break;
-			}
-			case "Flowey/K": {
-				// noinspection SpellCheckingInspection
-				this.addHintText("Managed to kill Flowey");
-				break;
-			}
-			case "Flowey/NK": {
-				this.addHintText("Reached an ending where you made no kills");
-				break;
-			}
-			case "Flowey/SK": {
-				// noinspection SpellCheckingInspection
-				this.addHintText("Flowey killed Asgore");
-				break;
-			}
-			case "Flowey/SPECIALK": {
-				// noinspection SpellCheckingInspection
-				this.addHintText(`Reached an ending while "truename" is 1`);
-				break;
-			}
-			case "Flowey/alter2": {
-				this.addHintText("Reached the end of Ruins while killing everything (Ruins genocide)");
-				break;
-			}
-			case "Flowey/truename": {
-				this.addHintText("Reached the end of Ruins while killing everything (Ruins genocide)");
-				break;
-			}
-			case "Sans/EndMet": {
-				this.addHintText("Met sans at the judgment hallway");
-				break;
-			}
-			case "Mett/O": {
-				// noinspection SpellCheckingInspection
-				this.addHintText("Experienced the Mettaton Opera");
-				break;
-			}
-			case "Mettaton/BossMet": {
-				// noinspection SpellCheckingInspection
-				this.addHintText("Encountered Mettaton. Skips turning Mettaton around");
-				break;
-			}
-			case "F7/F7": {
-				// noinspection SpellCheckingInspection
-				this.addHintText("Finished the Asriel fight. Changes title menu");
-				break;
-			}
-			case "reset/reset": {
-				this.addHintText(`Set on naming screen after a true reset. Activates "Activity Level A" and "Activity Level B"`);
-				break;
-			}
-			case "reset/s_key": {
-				// noinspection SpellCheckingInspection
-				this.addHintText("Set if you hit 0 names on credits. Opens the mysterious door in a cave near Snowdin");
-				break;
-			}
+			
 		}
 	}
 

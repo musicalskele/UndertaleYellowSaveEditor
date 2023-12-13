@@ -137,19 +137,19 @@ const openIni = (input) => {
 
 		updateStatus({ message: `"${input.name}" is ready.`, color: "inherit" });
 
-		toggleControls({ selector: "#iniEditor *", disabled: false, });
-		toggleControls({ selector: "#iniButton", disabled: false, });
+		toggleControls({ selector: "#fileEditor *", disabled: false, });
+		toggleControls({ selector: "#fileButton", disabled: false, });
 		toggleControls({ selector: "#save", disabled: false });
 
-		document.querySelector("#iniButton").click();
-		document.querySelector("#iniButtonText").innerText = input.name;
+		document.querySelector("#fileButton").click();
+		document.querySelector("#fileButtonText").innerText = input.name;
 
 		OpenedFiles.ini = input.name;
 	}).catch((error) => {
 		updateStatus({ message: `"${error.toString()}" when parsing "${input.name}"`, color: "red" });
 
-		toggleControls({ selector: "#iniEditor *", disabled: true, });
-		toggleControls({ selector: "#iniButton", disabled: true, });
+		toggleControls({ selector: "#fileEditor *", disabled: true, });
+		toggleControls({ selector: "#fileButton", disabled: true, });
 
 		if (!OpenedFiles.file) {
 			toggleControls({ selector: "#save", disabled: true });
@@ -197,7 +197,6 @@ const openFile = (input) => {
 
 
 		updateStatus({ message: `"${input.name}" is ready.`, color: "inherit" });
-
 		toggleControls({ selector: "#fileEditor *", disabled: false });
 		toggleControls({ selector: "#fileButton", disabled: false });
 		toggleControls({ selector: "#save, #yellowName", disabled: false });
